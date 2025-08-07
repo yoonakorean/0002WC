@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1-1 單字聽力測驗</title>
+  <title>1-2 單字聽力測驗</title>
   <style>
     body {
       font-family: sans-serif;
@@ -61,8 +61,8 @@
 </head>
 <body>
   <img src="logo.png" alt="Logo" id="logo" />
-  <div id="game-title">1-1 單字聽力測驗</div>
-  <p id="question-number">第 1 題 / 共 15 題</p>
+  <div id="game-title">1-2 單字聽力測驗</div>
+  <p id="question-number">第 1 題 / 共 16 題</p>
   <audio id="audio" controls></audio>
   <div id="choices"></div>
   <button id="next-btn" disabled>下一題</button>
@@ -81,24 +81,25 @@
   </div>
 
   <script>
-    const gameTitle = "1-1 單字聽力測驗";
+    const gameTitle = "1-2 單字聽力測驗";
 
     const questions = [
-      { word: "ㅏ", audio: "audio/a.mp3", choices: ["ㅏ", "ㅓ", "ㅜ"] },
-      { word: "ㅓ", audio: "audio/eo.mp3", choices: ["ㅓ", "ㅏ", "ㅗ"] },
-      { word: "ㅗ", audio: "audio/o.mp3", choices: ["ㅗ", "ㅜ", "ㅓ"] },
-      { word: "ㅜ", audio: "audio/u.mp3", choices: ["ㅜ", "ㅗ", "ㅡ"] },
-      { word: "ㅡ", audio: "audio/eu.mp3", choices: ["ㅡ", "ㅓ", "ㅜ"] },
-      { word: "ㅑ", audio: "audio/ya.mp3", choices: ["ㅑ", "ㅕ", "ㅛ"] },
-      { word: "ㅕ", audio: "audio/yeo.mp3", choices: ["ㅕ", "ㅛ", "ㅑ"] },
-      { word: "ㅛ", audio: "audio/yo.mp3", choices: ["ㅛ", "ㅠ", "ㅕ"] },
-      { word: "ㅠ", audio: "audio/yu.mp3", choices: ["ㅠ", "ㅜ", "ㅣ"] },
-      { word: "ㅣ", audio: "audio/i.mp3", choices: ["ㅣ", "ㅡ", "ㅑ"] },
-      { word: "오이", audio: "audio/cucumber.mp3", choices: ["오이", "우이", "요이"] },
-      { word: "여우", audio: "audio/fox.mp3", choices: ["여우", "여유", "야유"] },
-      { word: "이유", audio: "audio/reason.mp3", choices: ["이유", "이요", "이여"] },
-      { word: "어여", audio: "audio/hurry.mp3", choices: ["어여", "오여", "오요"] },
-      { word: "우유", audio: "audio/milk.mp3", choices: ["우유", "우요", "어유"] }
+      { word: "나라", audio: "audio/1.mp3", choices: ["나라", "나러", "나나"] },
+      { word: "나무", audio: "audio/2.mp3", choices: ["나무", "나모", "너무"] },
+      { word: "나이", audio: "audio/3.mp3", choices: ["나이", "너이", "나으"] },
+      { word: "누나", audio: "audio/4.mp3", choices: ["누나", "누너", "루나"] },
+      { word: "루머", audio: "audio/5.mp3", choices: ["루머", "러머", "루마"] },
+      { word: "머리", audio: "audio/6.mp3", choices: ["머리", "마리", "머라"] },
+      { word: "무료", audio: "audio/7.mp3", choices: ["무료", "무려", "모료"] },
+      { word: "아니요", audio: "audio/8.mp3", choices: ["아니요", "아니우", "어니요"] },
+      { word: "어느", audio: "audio/9.mp3", choices: ["어느", "어니", "오느"] },
+      { word: "어머니", audio: "audio/10.mp3", choices: ["어머니", "어머리", "아마니"] },
+      { word: "오후", audio: "audio/11.mp3", choices: ["오후", "오혀", "우호"] },
+      { word: "이마", audio: "audio/12.mp3", choices: ["이마", "아마", "으머"] },
+      { word: "이모", audio: "audio/13.mp3", choices: ["이모", "어모", "이무"] },
+      { word: "하마", audio: "audio/14.mp3", choices: ["하마", "하머", "허마"] },
+      { word: "허리", audio: "audio/15.mp3", choices: ["허리", "하리", "허라"] },
+      { word: "혀", audio: "audio/16.mp3", choices: ["혀", "후", "효"] }
     ];
 
     let shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
