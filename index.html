@@ -24,6 +24,11 @@
     }
     #question-number {
       font-size: 18px;
+      margin-bottom: 10px;
+    }
+    #timer {
+      font-size: 18px;
+      color: #c00;
       margin-bottom: 20px;
     }
     button {
@@ -57,14 +62,20 @@
       color: #888;
       margin: 2px 0;
     }
+    #feedback {
+      margin-top: 10px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
   <img src="logo.png" alt="Logo" id="logo" />
   <div id="game-title">0-2 單字聽力測驗</div>
-  <p id="question-number">第 1 題 / 共 16 題</p>
+  <p id="question-number">第 1 題 / 共 12 題</p>
+  <p id="timer">剩餘時間：-- 秒</p>
   <audio id="audio" controls></audio>
   <div id="choices"></div>
+  <div id="feedback"></div>
   <button id="next-btn" disabled>下一題</button>
 
   <div id="result" class="hidden">
@@ -84,35 +95,55 @@
     const gameTitle = "0-2 單字聽力測驗";
 
     const questions = [
-      { word: "나라", audio: "audio/000201W.mp3", choices: ["나라", "나러", "나나"] },
-      { word: "나무", audio: "audio/000202W.mp3", choices: ["나무", "나모", "너무"] },
-      { word: "나이", audio: "audio/000203W.mp3", choices: ["나이", "너이", "나으"] },
-      { word: "누나", audio: "audio/000204W.mp3", choices: ["누나", "누너", "루나"] },
-      { word: "루머", audio: "audio/000205W.mp3", choices: ["루머", "러머", "루마"] },
-      { word: "머리", audio: "audio/000206W.mp3", choices: ["머리", "마리", "머라"] },
-      { word: "무료", audio: "audio/000207W.mp3", choices: ["무료", "무려", "모료"] },
-      { word: "아니요", audio: "audio/000208W.mp3", choices: ["아니요", "아니우", "어니요"] },
-      { word: "어느", audio: "audio/000209W.mp3", choices: ["어느", "어니", "오느"] },
-      { word: "어머니", audio: "audio/000210W.mp3", choices: ["어머니", "어머리", "아마니"] },
-      { word: "오후", audio: "audio/000211W.mp3", choices: ["오후", "오혀", "우호"] },
-      { word: "이마", audio: "audio/000212W.mp3", choices: ["이마", "아마", "으머"] },
-      { word: "이모", audio: "audio/000213W.mp3", choices: ["이모", "어모", "이무"] },
-      { word: "하마", audio: "audio/000214W.mp3", choices: ["하마", "하머", "허마"] },
-      { word: "허리", audio: "audio/000215W.mp3", choices: ["허리", "하리", "허라"] },
-      { word: "혀", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
+       { word: "나라", korean: "國家", audio: "audio/000201W.mp3", choices: ["나라", "나러", "나나"] },
+       { word: "나무", korean: "樹", audio: "audio/000202W.mp3", choices: ["나무", "나모", "너무"] },
+       { word: "나이", korean: "年齡", audio: "audio/000203W.mp3", choices: ["나이", "너이", "나으"] },
+       { word: "누나", korean: "姊姊", audio: "audio/000204W.mp3", choices: ["누나", "누너", "루나"] },
+       { word: "루머", korean: "謠言", audio: "audio/000205W.mp3", choices: ["루머", "러머", "루마"] },
+       { word: "머리", korean: "頭", audio: "audio/000206W.mp3", choices: ["머리", "마리", "머라"] },
+       { word: "무료", korean: "免費", audio: "audio/000207W.mp3", choices: ["무료", "무려", "모료"] },
+       { word: "아니요", korean: "不", audio: "audio/000208W.mp3", choices: ["아니요", "아니우", "어니요"] },
+       { word: "어느", korean: "哪個", audio: "audio/000209W.mp3", choices: ["어느", "어니", "오느"] },
+       { word: "어머니", korean: "母親", audio: "audio/000210W.mp3", choices: ["어머니", "어머리", "아마니"] },
+       { word: "오후", korean: "下午", audio: "audio/000211W.mp3", choices: ["오후", "오혀", "우호"] },
+       { word: "이마", korean: "額頭", audio: "audio/000212W.mp3", choices: ["이마", "아마", "으머"] },
+       { word: "이모", korean: "阿姨", audio: "audio/000213W.mp3", choices: ["이모", "어모", "이무"] },
+       { word: "하마", korean: "河馬", audio: "audio/000214W.mp3", choices: ["하마", "하머", "허마"] },
+       { word: "허리", korean: "腰", audio: "audio/000215W.mp3", choices: ["허리", "하리", "허라"] },
+       { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
+
     ];
 
     let shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
     let current = 0;
     let correct = 0;
+    let timerId;
+    const totalSeconds = shuffledQuestions.length * 8;
+    let timeLeft = totalSeconds;
 
     const audio = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
+    const feedback = document.getElementById("feedback");
     const nextBtn = document.getElementById("next-btn");
     const questionNum = document.getElementById("question-number");
+    const timerDisplay = document.getElementById("timer");
+
+    function startTimer() {
+      timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
+      timerId = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          alert("⏰ 時間到！系統將自動交卷");
+          showResult();
+        }
+      }, 1000);
+    }
 
     function loadQuestion() {
       nextBtn.disabled = true;
+      feedback.textContent = "";
       questionNum.textContent = `第 ${current + 1} 題 / 共 ${shuffledQuestions.length} 題`;
       const q = shuffledQuestions[current];
       audio.src = q.audio;
@@ -123,10 +154,29 @@
         btn.textContent = choice;
         btn.className = "choice-btn";
         btn.onclick = () => {
-          if (choice === q.word) correct++;
+          const correctAnswer = q.word;
+          const korean = q.word;
+          const chinese = q.korean;
+
+          if (choice === correctAnswer) {
+            correct++;
+            feedback.textContent = `✅ 正確！中文：${chinese}`;
+            feedback.style.color = "green";
+          } else {
+            feedback.textContent = `❌ 錯誤。正確答案是 "${correctAnswer}"（中文：${chinese}）`;
+            feedback.style.color = "red";
+          }
+
           nextBtn.disabled = false;
-          document.querySelectorAll(".choice-btn").forEach((b) => (b.disabled = true));
-          btn.style.backgroundColor = choice === q.word ? "#8f8" : "#f88";
+
+          document.querySelectorAll(".choice-btn").forEach((b) => {
+            b.disabled = true;
+            if (b.textContent === correctAnswer) {
+              b.style.backgroundColor = "#8f8";
+            } else if (b === btn) {
+              b.style.backgroundColor = "#f88";
+            }
+          });
         };
         choicesDiv.appendChild(btn);
       });
@@ -137,6 +187,7 @@
       if (current < shuffledQuestions.length) {
         loadQuestion();
       } else {
+        clearInterval(timerId);
         showResult();
       }
     };
@@ -146,6 +197,8 @@
       choicesDiv.classList.add("hidden");
       nextBtn.classList.add("hidden");
       questionNum.classList.add("hidden");
+      feedback.classList.add("hidden");
+      timerDisplay.classList.add("hidden");
       document.getElementById("result").classList.remove("hidden");
 
       const percent = Math.round((correct / shuffledQuestions.length) * 100);
@@ -159,7 +212,7 @@
         submitBtn.disabled = false;
         submitBtn.style.opacity = "1";
       } else {
-        passFailText.textContent = "❌ 成績不合格";
+        passFailText.textContent = "❌ 成績不合格，請重新測驗";
         submitBtn.disabled = true;
         submitBtn.style.opacity = "0.5";
       }
@@ -191,18 +244,17 @@
         method: "POST",
         mode: "no-cors",
         body: formData
-      })
-        .then(() => {
-          const nowText = `${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}時${now.getMinutes()}分${now.getSeconds()}秒 已完成回傳`;
-          document.getElementById("submit-time").textContent = nowText;
-
-          alert("✅ 提交成功!!可重複測驗");
-        })
-        .catch(() => {
-          alert("❌ 回傳失敗，請稍後再試");
-        });
+      }).then(() => {
+        const nowText = `${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}時${now.getMinutes()}分${now.getSeconds()}秒 已完成回傳`;
+        document.getElementById("submit-time").textContent = nowText;
+        alert("✅ 提交成功!!可重複測驗");
+      }).catch(() => {
+        alert("❌ 回傳失敗，請稍後再試");
+      });
     }
 
+    // 啟動畫面載入
+    startTimer();
     loadQuestion();
   </script>
 </body>
