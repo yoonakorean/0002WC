@@ -31,8 +31,6 @@
       color: #c00;
       margin-bottom: 20px;
     }
-
-    /* 統一按鈕大小樣式（包含選項按鈕） */
     button {
       margin: 10px auto;
       padding: 10px 20px;
@@ -47,14 +45,11 @@
     }
     button:hover { background-color: #e9e9e9; }
     button:disabled { background-color: #ddd; cursor: not-allowed; }
-
     .choice-btn {
       text-align: center;
       box-sizing: border-box;
     }
-
     .hidden { display: none; }
-
     #nickname {
       padding: 8px;
       font-size: 16px;
@@ -79,11 +74,15 @@
     #mode-select {
       margin-top: 20px;
     }
+    #practice-message {
+      color: #d2691e; /* 巧克力橘色 */
+      font-size: 16px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <script>
-    // 密碼保護（若不需要可移除）
     var password = prompt("請輸入密碼才能進入此網站：");
     if (password !== "1231") {
       alert("密碼錯誤，無法進入！");
@@ -91,14 +90,12 @@
     }
   </script>
 
-  <!-- 模式選擇 -->
   <div id="mode-select">
     <h2>請選擇模式</h2>
     <button onclick="startGame('practice')">練習模式（無時間限制）</button>
     <button onclick="startGame('test')">測驗模式（限時）</button>
   </div>
 
-  <!-- 測驗畫面 -->
   <div id="game-container" class="hidden">
     <img src="logo.png" alt="Logo" id="logo" />
     <div id="game-title">0-2 單字聽力測驗</div>
@@ -116,6 +113,7 @@
       <p id="pass-fail"></p>
 
       <input type="text" id="nickname" placeholder="請輸入姓名＋生日( 範例：王小明0828 )" />
+      <p class="note" id="practice-message" class="hidden">可重複練習～最後記得要去測驗模式挑戰後回傳合格成績歐！！</p>
       <p class="note">姓名＋生日 範例：王小明0828</p>
       <p class="note">請回傳合格成績</p>
       <p id="submit-time" class="note"></p>
@@ -160,7 +158,8 @@
     let answerLog = [];
     let startTime = 0;
     let endTime = 0;
-    let timeOver = false; // 若時間到之後仍可以作答，但成績一定不合格
+    let timeOver = false;
+    let mode = "";
 
     const audioEl = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
@@ -170,14 +169,15 @@
     const timerDisplay = document.getElementById("timer");
     const submitBtn = document.getElementById("submit-btn");
     const downloadBtn = document.getElementById("download-btn");
+    const nicknameInput = document.getElementById("nickname");
+    const practiceMessage = document.getElementById("practice-message");
 
     function startGame(selectedMode) {
-      mode = selectedMode; // global-ish
+      mode = selectedMode;
       document.getElementById("mode-select").classList.add("hidden");
       document.getElementById("game-container").classList.remove("hidden");
       document.getElementById("result").classList.add("hidden");
 
-      // 初始化變數
       current = 0;
       correct = 0;
       timerStarted = false;
@@ -185,19 +185,18 @@
       timeOver = false;
       clearInterval(timerId);
 
-      // 重新產生亂序題目
       shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
       totalSeconds = shuffledQuestions.length * 8;
       timeLeft = totalSeconds;
 
-      // UI 設定
       audioEl.classList.remove("hidden");
       choicesDiv.classList.remove("hidden");
       nextBtn.classList.remove("hidden");
       questionNum.classList.remove("hidden");
       feedback.classList.remove("hidden");
-      document.getElementById("result").classList.add("hidden");
-      document.getElementById("submit-time").textContent = "";
+      timerDisplay.classList.remove("hidden");
+
+      practiceMessage.classList.add("hidden");
 
       if (mode === "practice") {
         timerDisplay.textContent = "練習模式：無時間限制";
@@ -224,7 +223,6 @@
           timeLeft = 0;
           timeOver = true;
           timerDisplay.textContent = "時間到！可以繼續作答，但成績將不合格";
-          // 不自動交卷，允許使用者繼續作答，但最後成績會被視為不合格
         } else {
           timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
         }
@@ -234,7 +232,6 @@
     function loadQuestion() {
       nextBtn.disabled = true;
       feedback.textContent = "";
-      // 安全檢查
       if (!shuffledQuestions || shuffledQuestions.length === 0) {
         choicesDiv.innerHTML = "<p>題目載入失敗</p>";
         return;
@@ -245,13 +242,11 @@
       audioEl.src = q.audio;
 
       choicesDiv.innerHTML = "";
-      // 隨機化選項順序再建立按鈕
       q.choices.slice().sort(() => 0.5 - Math.random()).forEach((choice) => {
         const btn = document.createElement("button");
         btn.textContent = choice;
         btn.className = "choice-btn";
         btn.onclick = () => {
-          // 防重複點選（按鈕會被 disabled）
           const correctAnswer = q.word;
           const selectedAnswer = choice;
           const chinese = q.korean;
@@ -274,7 +269,6 @@
           }
 
           nextBtn.disabled = false;
-          // 將所有選項 disable 並標示顏色
           document.querySelectorAll("#choices .choice-btn").forEach((b) => {
             b.disabled = true;
             if (b.textContent === correctAnswer) {
@@ -293,14 +287,12 @@
       if (current < shuffledQuestions.length) {
         loadQuestion();
       } else {
-        // 答題結束
         if (mode === "test") clearInterval(timerId);
         showResult();
       }
     };
 
     function showResult() {
-      // 隱藏題目區、顯示結果區
       audioEl.classList.add("hidden");
       choicesDiv.classList.add("hidden");
       nextBtn.classList.add("hidden");
@@ -314,15 +306,26 @@
 
       const percent = Math.round((correct / shuffledQuestions.length) * 100);
       document.getElementById("score-text").textContent = `你的分數是 ${percent}% (${correct} / ${shuffledQuestions.length})`;
-      // 顯示是否合格條件：>=80 且 未超時
       const passFailText = document.getElementById("pass-fail");
+
       if (mode === "practice") {
-        passFailText.textContent = "🔍 練習模式結束";
+        passFailText.textContent = "";
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
+        nicknameInput.style.display = "none";
+        document.querySelector("#practice-message").style.display = "block";
+        document.querySelector("#practice-message").textContent = "可重複練習～最後記得要去測驗模式挑戰後回傳合格成績歐！！";
+        document.querySelector(".note:nth-of-type(2)").style.display = "none"; // 隱藏姓名＋生日範例
+        document.querySelector(".note:nth-of-type(3)").style.display = "none"; // 隱藏請回傳合格成績
         document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
         return;
       }
+
+      // 測驗模式
+      nicknameInput.style.display = "inline-block";
+      document.querySelector("#practice-message").style.display = "none";
+      document.querySelector(".note:nth-of-type(2)").style.display = "block";
+      document.querySelector(".note:nth-of-type(3)").style.display = "block";
 
       if (percent >= 80 && !timeOver) {
         passFailText.textContent = "🎉 成績合格！";
@@ -333,12 +336,10 @@
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
       }
-
       document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
     }
 
     function goBackToModeSelect() {
-      // 恢復到模式選擇畫面，重設狀態
       document.getElementById("result").classList.add("hidden");
       document.getElementById("mode-select").classList.remove("hidden");
       document.getElementById("game-container").classList.add("hidden");
@@ -354,20 +355,17 @@
       endTime = 0;
       timeOver = false;
 
-      // 顯示 timer 元素，以便下次進入時能被看到
       timerDisplay.classList.remove("hidden");
     }
 
-    // 當使用者播放音檔時啟動計時（只在測驗模式）
     audioEl.addEventListener("play", () => {
       if (!timerStarted && mode === "test") {
         startTimer();
       }
     });
 
-    // 提交到 Google 表單（請保持 formURL 與 entry id 正確）
     function submitToGoogle() {
-      const nickname = document.getElementById("nickname").value.trim();
+      const nickname = nicknameInput.value.trim();
       if (!nickname) {
         alert("請輸入暱稱");
         return;
@@ -379,13 +377,11 @@
       const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
       const weekday = weekdays[now.getDay()];
 
-      // 建立答題紀錄文字（送到表單），但下載檔案時我們不會包含答題紀錄
       const answerLogText = answerLog.map(item => {
         const status = item.isCorrect ? "正確" : "錯誤";
         return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
       }).join("\n");
 
-      // 替換成你的 Google Form 的 formResponse URL
       const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd8KhDu_lq6g4aPzkLaNYUUVG9P0E9cRT1R2WVDIkkfFh7WxA/formResponse";
       const formData = new FormData();
       formData.append("entry.1082970818", nickname);
@@ -400,14 +396,12 @@
           alert("✅ 提交成功!! 可重複測驗");
         })
         .catch(() => {
-          // no-cors 時通常不會進入 then/catch 可用 fallback 提示
           alert("✅ 已送出（若瀏覽器阻擋回應，請確認表單是否收到）");
         });
     }
 
-    // 產生並下載成績圖（**不包含答題紀錄**）
     function downloadResult() {
-      const nickname = document.getElementById("nickname").value.trim();
+      const nickname = nicknameInput.value.trim();
       if (!nickname) {
         alert("請輸入姓名才能下載成績圖片");
         return;
@@ -417,99 +411,24 @@
       const time = now.toLocaleString("zh-TW");
       const pass = (score >= 80 && !timeOver) ? "合格 🎉" : "不合格 ❌";
 
-      generateAndDownloadImage({
-        logoSrc: "logo.png",
-        title: gameTitle,
-        testTime: time,
-        nickname,
-        score,
-        pass,
-        correct,
-        total: shuffledQuestions.length,
-        timeSpentSeconds: Math.floor((endTime - startTime) / 1000)
-      });
+      let text = `單字聽力測驗成績\n姓名: ${nickname}\n分數: ${score}%\n結果: ${pass}\n花費時間: ${Math.floor((endTime - startTime)/1000)}秒`;
+
+      const answerLogText = answerLog.map(item => {
+        const status = item.isCorrect ? "正確" : "錯誤";
+        return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
+      }).join("\n");
+
+      // 答題紀錄不顯示在下載內容，照你要求，所以這裡沒放
+
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${nickname}_聽力測驗成績.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
-
-    function generateAndDownloadImage({logoSrc, title, testTime, nickname, score, pass, correct, total, timeSpentSeconds}) {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const width = 800;
-      const lineHeight = 30;
-      let y = 20;
-      canvas.width = width;
-      canvas.height = 420;
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, width, canvas.height);
-      ctx.fillStyle = "#000";
-      ctx.textBaseline = "top";
-      ctx.font = "22px sans-serif";
-
-      const img = new Image();
-      img.src = logoSrc;
-      img.onload = () => {
-        const imgWidth = 140;
-        const imgHeight = img.height * (imgWidth / img.width || 1);
-        ctx.drawImage(img, (width - imgWidth) / 2, y, imgWidth, imgHeight);
-        y += imgHeight + 10;
-
-        ctx.font = "26px sans-serif";
-        ctx.fillText(title, 20, y);
-        y += lineHeight + 5;
-
-        ctx.font = "20px sans-serif";
-        ctx.fillText(`測驗時間：${testTime}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`測驗者名稱：${nickname}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`成績：${score}% (${correct} / ${total})`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`是否合格：${pass}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`花費時間：${timeSpentSeconds} 秒`, 20, y);
-        y += lineHeight;
-
-        canvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${nickname}_${title}_成績.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        });
-      };
-
-      // 若 logo 載入失敗，也強制產生結果（避免無 logo 時無法下載）
-      img.onerror = () => {
-        ctx.font = "26px sans-serif";
-        ctx.fillText(title, 20, y);
-        y += lineHeight + 5;
-        ctx.font = "20px sans-serif";
-        ctx.fillText(`測驗時間：${testTime}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`測驗者名稱：${nickname}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`成績：${score}% (${correct} / ${total})`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`是否合格：${pass}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`花費時間：${timeSpentSeconds} 秒`, 20, y);
-
-        canvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${nickname}_${title}_成績.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        });
-      };
-    }
-
-    // 當頁面載入時，確保 UI 狀態為初始
-    (function init() {
-      document.getElementById("game-container").classList.add("hidden");
-      document.getElementById("result").classList.add("hidden");
-    })();
   </script>
 </body>
 </html>
