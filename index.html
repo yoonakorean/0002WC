@@ -95,7 +95,7 @@
   <div id="mode-select">
     <h2>請選擇模式</h2>
     <button onclick="startGame('practice')">練習模式（無時間限制）</button>
-    <button onclick="startGame('test')">測驗模式（限時）</button>
+    <button onclick="startGame('test')">挑戰模式（限時）</button>
     <p style="font-size:14px; color:#555; margin-top:10px;">兩種模式皆可重複練習～</p>
   </div>
 
@@ -332,7 +332,7 @@
         submitNote.style.display = "none";
 
         practiceMessage.style.display = "block";
-        practiceMessage.innerHTML = "可重複練習～<br>最後記得要去測驗模式挑戰後回傳合格成績歐！！";
+        practiceMessage.innerHTML = "可重複練習～<br>最後記得要去挑戰模式挑戰後回傳合格成績歐！！";
 
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
@@ -406,7 +406,7 @@
       formData.append("entry.1052097214", answerLogText);
 
       fetch(formURL, { method: "POST", mode: "no-cors", body: formData })
-        .then(() => alert("成績已回傳！感謝您的參與。"))
+        .then(() => alert("成績已回傳！可重複挑戰。"))
         .catch(() => alert("回傳失敗，請稍後再試。"));
     }
 
