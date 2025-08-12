@@ -410,68 +410,71 @@
         .catch(() => alert("回傳失敗，請稍後再試。"));
     }
 
-    // 下載成績（圖片） - 依你的新版樣式改寫
+    // 下載成績（圖片） - 調整版面字體與新增測驗時間
     function downloadResult() {
       const captureDiv = document.createElement("div");
       captureDiv.style.width = "360px";
       captureDiv.style.margin = "auto";
-      captureDiv.style.padding = "25px 20px";
+      captureDiv.style.padding = "30px 25px";
       captureDiv.style.border = "1.5px solid #bbb";
       captureDiv.style.backgroundColor = "#fafafa";
       captureDiv.style.textAlign = "center";
       captureDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       captureDiv.style.color = "#333";
       captureDiv.style.borderRadius = "10px";
+      captureDiv.style.lineHeight = "1.6";       // 行高拉開
+      captureDiv.style.letterSpacing = "0.03em"; // 字間距拉開
 
       // Logo
       const logoImg = document.createElement("img");
       logoImg.src = "logo.png";
       logoImg.style.width = "140px";
-      logoImg.style.marginBottom = "15px";
+      logoImg.style.marginBottom = "20px";
       captureDiv.appendChild(logoImg);
 
       // 標題
       const titleEl = document.createElement("div");
       titleEl.textContent = gameTitle;
-      titleEl.style.fontSize = "22px";
+      titleEl.style.fontSize = "18px"; // 字體改小
       titleEl.style.fontWeight = "700";
-      titleEl.style.marginBottom = "20px";
+      titleEl.style.marginBottom = "22px";
       captureDiv.appendChild(titleEl);
 
-      // 測驗時間
+      // 測驗時間（新增）
       const timeText = document.getElementById("submit-time").textContent || "";
       const timeEl = document.createElement("div");
-      timeEl.textContent = timeText;
-      timeEl.style.fontSize = "16px";
-      timeEl.style.marginBottom = "18px";
+      timeEl.textContent = `測驗時間：${timeText.replace("花費時間：", "")}`;
+      timeEl.style.fontSize = "14px";
+      timeEl.style.marginBottom = "20px";
+      timeEl.style.color = "#555";
       captureDiv.appendChild(timeEl);
 
       // 姓名
       const nickname = nicknameInput.value.trim();
       const nameEl = document.createElement("div");
       nameEl.textContent = `姓名：${nickname}`;
-      nameEl.style.fontSize = "18px";
+      nameEl.style.fontSize = "16px";
       nameEl.style.fontWeight = "600";
-      nameEl.style.marginBottom = "18px";
+      nameEl.style.marginBottom = "20px";
       captureDiv.appendChild(nameEl);
 
       // 成績
       const scoreText = document.getElementById("score-text").textContent || "";
       const scoreEl = document.createElement("div");
       scoreEl.textContent = scoreText;
-      scoreEl.style.fontSize = "18px";
+      scoreEl.style.fontSize = "16px";
       scoreEl.style.fontWeight = "600";
-      scoreEl.style.marginBottom = "18px";
+      scoreEl.style.marginBottom = "20px";
       captureDiv.appendChild(scoreEl);
 
       // 是否合格
       const passFail = document.getElementById("pass-fail").textContent || "";
       const passFailEl = document.createElement("div");
       passFailEl.textContent = passFail;
-      passFailEl.style.fontSize = "18px";
+      passFailEl.style.fontSize = "16px";
       passFailEl.style.fontWeight = "700";
       passFailEl.style.color = passFail.includes("合格") ? "#007700" : "#c00";
-      passFailEl.style.marginBottom = "18px";
+      passFailEl.style.marginBottom = "20px";
       captureDiv.appendChild(passFailEl);
 
       document.body.appendChild(captureDiv);
