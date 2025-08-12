@@ -255,7 +255,7 @@
       formData.append("entry.498226528", time);
       formData.append("entry.532888754", weekday);
       formData.append("entry.1110600272", gameTitle);
-      formData.append(answerLogEntryId, JSON.stringify(answerLog));  // 新增答題詳細紀錄
+      formData.append("entry.1052097214", JSON.stringify(answerLog));  // 新增答題詳細紀錄
 
       fetch(formURL, {
         method: "POST",
