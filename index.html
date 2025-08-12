@@ -111,7 +111,6 @@
        { word: "하마", korean: "河馬", audio: "audio/000214W.mp3", choices: ["하마", "하머", "허마"] },
        { word: "허리", korean: "腰", audio: "audio/000215W.mp3", choices: ["허리", "하리", "허라"] },
        { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
-
     ];
 
     let shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
@@ -120,6 +119,7 @@
     let timerId;
     const totalSeconds = shuffledQuestions.length * 8;
     let timeLeft = totalSeconds;
+    let timerStarted = false; // 記錄是否已啟動計時
 
     const audio = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
@@ -155,7 +155,6 @@
         btn.className = "choice-btn";
         btn.onclick = () => {
           const correctAnswer = q.word;
-          const korean = q.word;
           const chinese = q.korean;
 
           if (choice === correctAnswer) {
@@ -253,8 +252,15 @@
       });
     }
 
-    // 啟動畫面載入
-    startTimer();
+    // 播放音檔後才啟動計時
+    audio.addEventListener("play", () => {
+      if (!timerStarted) {
+        timerStarted = true;
+        startTimer();
+      }
+    });
+
+    // 載入第一題
     loadQuestion();
   </script>
 </body>
