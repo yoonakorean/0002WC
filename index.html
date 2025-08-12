@@ -128,8 +128,10 @@
     const questionNum = document.getElementById("question-number");
     const timerDisplay = document.getElementById("timer");
 
+    // 頁面載入先顯示總秒數
+    timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
+
     function startTimer() {
-      timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
       timerId = setInterval(() => {
         timeLeft--;
         timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
