@@ -69,14 +69,14 @@
   </style>
 </head>
 <body>
-    <script>
+  <script>
     var password = prompt("請輸入密碼才能進入此網站：");
     if (password !== "1231") {
       alert("密碼錯誤，無法進入！");
       window.location.href = "https://www.google.com";
     }
   </script>
-  
+
   <img src="logo.png" alt="Logo" id="logo" />
   <div id="game-title">0-2 單字聽力測驗</div>
   <p id="question-number">第 1 題 / 共 16 題</p>
@@ -103,22 +103,22 @@
     const gameTitle = "0-2 單字聽力測驗";
 
     const questions = [
-       { word: "나라", korean: "國家", audio: "audio/000201W.mp3", choices: ["나라", "나러", "나나"] },
-       { word: "나무", korean: "樹", audio: "audio/000202W.mp3", choices: ["나무", "나모", "너무"] },
-       { word: "나이", korean: "年齡", audio: "audio/000203W.mp3", choices: ["나이", "너이", "나으"] },
-       { word: "누나", korean: "姊姊", audio: "audio/000204W.mp3", choices: ["누나", "누너", "루나"] },
-       { word: "루머", korean: "謠言", audio: "audio/000205W.mp3", choices: ["루머", "러머", "루마"] },
-       { word: "머리", korean: "頭", audio: "audio/000206W.mp3", choices: ["머리", "마리", "머라"] },
-       { word: "무료", korean: "免費", audio: "audio/000207W.mp3", choices: ["무료", "무려", "모료"] },
-       { word: "아니요", korean: "不", audio: "audio/000208W.mp3", choices: ["아니요", "아니우", "어니요"] },
-       { word: "어느", korean: "哪個", audio: "audio/000209W.mp3", choices: ["어느", "어니", "오느"] },
-       { word: "어머니", korean: "母親", audio: "audio/000210W.mp3", choices: ["어머니", "어머리", "아마니"] },
-       { word: "오후", korean: "下午", audio: "audio/000211W.mp3", choices: ["오후", "오혀", "우호"] },
-       { word: "이마", korean: "額頭", audio: "audio/000212W.mp3", choices: ["이마", "아마", "으머"] },
-       { word: "이모", korean: "阿姨", audio: "audio/000213W.mp3", choices: ["이모", "어모", "이무"] },
-       { word: "하마", korean: "河馬", audio: "audio/000214W.mp3", choices: ["하마", "하머", "허마"] },
-       { word: "허리", korean: "腰", audio: "audio/000215W.mp3", choices: ["허리", "하리", "허라"] },
-       { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
+      { word: "나라", korean: "國家", audio: "audio/000201W.mp3", choices: ["나라", "나러", "나나"] },
+      { word: "나무", korean: "樹", audio: "audio/000202W.mp3", choices: ["나무", "나모", "너무"] },
+      { word: "나이", korean: "年齡", audio: "audio/000203W.mp3", choices: ["나이", "너이", "나으"] },
+      { word: "누나", korean: "姊姊", audio: "audio/000204W.mp3", choices: ["누나", "누너", "루나"] },
+      { word: "루머", korean: "謠言", audio: "audio/000205W.mp3", choices: ["루머", "러머", "루마"] },
+      { word: "머리", korean: "頭", audio: "audio/000206W.mp3", choices: ["머리", "마리", "머라"] },
+      { word: "무료", korean: "免費", audio: "audio/000207W.mp3", choices: ["무료", "무려", "모료"] },
+      { word: "아니요", korean: "不", audio: "audio/000208W.mp3", choices: ["아니요", "아니우", "어니요"] },
+      { word: "어느", korean: "哪個", audio: "audio/000209W.mp3", choices: ["어느", "어니", "오느"] },
+      { word: "어머니", korean: "母親", audio: "audio/000210W.mp3", choices: ["어머니", "어머리", "아마니"] },
+      { word: "오후", korean: "下午", audio: "audio/000211W.mp3", choices: ["오후", "오혀", "우호"] },
+      { word: "이마", korean: "額頭", audio: "audio/000212W.mp3", choices: ["이마", "아마", "으머"] },
+      { word: "이모", korean: "阿姨", audio: "audio/000213W.mp3", choices: ["이모", "어모", "이무"] },
+      { word: "하마", korean: "河馬", audio: "audio/000214W.mp3", choices: ["하마", "하머", "허마"] },
+      { word: "허리", korean: "腰", audio: "audio/000215W.mp3", choices: ["허리", "하리", "허라"] },
+      { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
     ];
 
     let shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
@@ -127,7 +127,7 @@
     let timerId;
     const totalSeconds = shuffledQuestions.length * 8;
     let timeLeft = totalSeconds;
-    let timerStarted = false; // 記錄是否已啟動計時
+    let timerStarted = false;
 
     const audio = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
@@ -136,10 +136,8 @@
     const questionNum = document.getElementById("question-number");
     const timerDisplay = document.getElementById("timer");
 
-    // 新增紀錄答題詳情的陣列
     let answerLog = [];
 
-    // 頁面載入先顯示總秒數
     timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
 
     function startTimer() {
@@ -171,7 +169,6 @@
           const selectedAnswer = choice;
           const chinese = q.korean;
 
-          // 紀錄答題資料
           answerLog.push({
             questionIndex: current + 1,
             questionWord: q.word,
@@ -253,7 +250,6 @@
       const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
       const weekday = weekdays[now.getDay()];
 
-      // 將 answerLog 轉成簡單易讀文字
       let answerLogText = answerLog.map(item => {
         const status = item.isCorrect ? "正確" : "錯誤";
         return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
@@ -267,7 +263,7 @@
       formData.append("entry.498226528", time);
       formData.append("entry.532888754", weekday);
       formData.append("entry.1110600272", gameTitle);
-      formData.append("entry.1052097214", answerLogText);  // 文字格式回傳
+      formData.append("entry.1052097214", answerLogText);
 
       fetch(formURL, {
         method: "POST",
@@ -277,12 +273,91 @@
         const nowText = `${now.getMonth() + 1}月${now.getDate()}日 ${now.getHours()}時${now.getMinutes()}分${now.getSeconds()}秒 已完成回傳`;
         document.getElementById("submit-time").textContent = nowText;
         alert("✅ 提交成功!!可重複測驗");
+
+        generateAndDownloadImage({
+          logoSrc: "logo.png",
+          title: gameTitle,
+          testTime: time,
+          nickname,
+          score,
+          pass: score >= 80,
+          answerLog
+        });
+
       }).catch(() => {
         alert("❌ 回傳失敗，請稍後再試");
       });
     }
 
-    // 播放音檔後才啟動計時
+    function generateAndDownloadImage({logoSrc, title, testTime, nickname, score, pass, answerLog}) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const width = 600;
+      const lineHeight = 28;
+      let y = 0;
+      canvas.width = width;
+      canvas.height = 650;
+
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, width, canvas.height);
+
+      ctx.fillStyle = "#000";
+      ctx.textBaseline = "top";
+      ctx.font = "20px sans-serif";
+
+      const img = new Image();
+      img.src = logoSrc;
+      img.onload = () => {
+        const imgWidth = 200;
+        const imgHeight = img.height * (imgWidth / img.width);
+        ctx.drawImage(img, (width - imgWidth) / 2, y, imgWidth, imgHeight);
+        y += imgHeight + 20;
+
+        ctx.font = "24px sans-serif";
+        ctx.fillText(title, 20, y);
+        y += lineHeight + 10;
+
+        ctx.font = "18px sans-serif";
+        ctx.fillText(`測驗時間：${testTime}`, 20, y);
+        y += lineHeight;
+
+        ctx.fillText(`測驗者名稱：${nickname}`, 20, y);
+        y += lineHeight;
+
+        ctx.fillText(`成績：${score}% (${correct} / ${shuffledQuestions.length})`, 20, y);
+        y += lineHeight;
+
+        ctx.fillText(`是否合格：${pass ? "合格 🎉" : "不合格 ❌"}`, 20, y);
+        y += lineHeight + 10;
+
+        ctx.font = "16px monospace";
+        ctx.fillText("答題記錄：", 20, y);
+        y += lineHeight;
+
+        const maxLogLines = 15;
+        for (let i = 0; i < Math.min(answerLog.length, maxLogLines); i++) {
+          const item = answerLog[i];
+          const status = item.isCorrect ? "✔️" : "❌";
+          const text = `第${item.questionIndex}題 ${item.questionWord} 選${item.selectedAnswer} ${status}`;
+          ctx.fillText(text, 20, y);
+          y += lineHeight;
+        }
+        if (answerLog.length > maxLogLines) {
+          ctx.fillText(`... 共${answerLog.length}題`, 20, y);
+        }
+
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${nickname}_${title}_成績.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      };
+    }
+
     audio.addEventListener("play", () => {
       if (!timerStarted) {
         timerStarted = true;
@@ -290,7 +365,6 @@
       }
     });
 
-    // 載入第一題
     loadQuestion();
   </script>
 </body>
