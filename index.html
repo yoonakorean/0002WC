@@ -69,6 +69,14 @@
   </style>
 </head>
 <body>
+    <script>
+    var password = prompt("請輸入密碼才能進入此網站：");
+    if (password !== "1231") {
+      alert("密碼錯誤，無法進入！");
+      window.location.href = "https://www.google.com";
+    }
+  </script>
+  
   <img src="logo.png" alt="Logo" id="logo" />
   <div id="game-title">0-2 單字聽力測驗</div>
   <p id="question-number">第 1 題 / 共 16 題</p>
