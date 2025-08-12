@@ -71,7 +71,7 @@
 <body>
   <img src="logo.png" alt="Logo" id="logo" />
   <div id="game-title">0-2 單字聽力測驗</div>
-  <p id="question-number">第 1 題 / 共 12 題</p>
+  <p id="question-number">第 1 題 / 共 16 題</p>
   <p id="timer">剩餘時間：-- 秒</p>
   <audio id="audio" controls></audio>
   <div id="choices"></div>
@@ -128,6 +128,9 @@
     const questionNum = document.getElementById("question-number");
     const timerDisplay = document.getElementById("timer");
 
+    // 新增紀錄答題詳情的陣列
+    let answerLog = [];
+
     // 頁面載入先顯示總秒數
     timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
 
@@ -157,9 +160,19 @@
         btn.className = "choice-btn";
         btn.onclick = () => {
           const correctAnswer = q.word;
+          const selectedAnswer = choice;
           const chinese = q.korean;
 
-          if (choice === correctAnswer) {
+          // 紀錄答題資料
+          answerLog.push({
+            questionIndex: current + 1,
+            questionWord: q.word,
+            selectedAnswer,
+            correctAnswer,
+            isCorrect: selectedAnswer === correctAnswer
+          });
+
+          if (selectedAnswer === correctAnswer) {
             correct++;
             feedback.textContent = `✅ 正確！中文：${chinese}`;
             feedback.style.color = "green";
@@ -232,6 +245,8 @@
       const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
       const weekday = weekdays[now.getDay()];
 
+      const answerLogEntryId = "entry.1052097214"; // 你的 Google 表單段落文字欄位 ID
+
       const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd8KhDu_lq6g4aPzkLaNYUUVG9P0E9cRT1R2WVDIkkfFh7WxA/formResponse";
 
       const formData = new FormData();
@@ -240,6 +255,7 @@
       formData.append("entry.498226528", time);
       formData.append("entry.532888754", weekday);
       formData.append("entry.1110600272", gameTitle);
+      formData.append(answerLogEntryId, JSON.stringify(answerLog));  // 新增答題詳細紀錄
 
       fetch(formURL, {
         method: "POST",
