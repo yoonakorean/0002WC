@@ -245,7 +245,11 @@
       const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
       const weekday = weekdays[now.getDay()];
 
-      const answerLogEntryId = "entry.1052097214"; // 你的 Google 表單段落文字欄位 ID
+      // 將 answerLog 轉成簡單易讀文字
+      let answerLogText = answerLog.map(item => {
+        const status = item.isCorrect ? "正確" : "錯誤";
+        return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
+      }).join("\n");
 
       const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd8KhDu_lq6g4aPzkLaNYUUVG9P0E9cRT1R2WVDIkkfFh7WxA/formResponse";
 
@@ -255,7 +259,7 @@
       formData.append("entry.498226528", time);
       formData.append("entry.532888754", weekday);
       formData.append("entry.1110600272", gameTitle);
-      formData.append("entry.1052097214", JSON.stringify(answerLog));  // 新增答題詳細紀錄
+      formData.append("entry.1052097214", answerLogText);  // 文字格式回傳
 
       fetch(formURL, {
         method: "POST",
