@@ -74,12 +74,8 @@
     #mode-select {
       margin-top: 20px;
     }
-    #practice-message {
-      color: #d2691e; /* 巧克力橘色 */
-      font-size: 16px;
-      margin-top: 10px;
-    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <script>
@@ -107,21 +103,22 @@
     <div id="feedback"></div>
     <button id="next-btn" disabled>下一題</button>
 
-    <div id="result" class="hidden">
+    <div id="result" class="hidden" style="text-align:center; padding: 15px;">
       <h2>🎯 測驗完成！</h2>
       <p id="score-text"></p>
       <p id="pass-fail"></p>
 
       <input type="text" id="nickname" placeholder="請輸入姓名＋生日( 範例：王小明0828 )" />
-      <p class="note" id="practice-message" class="hidden">可重複練習～最後記得要去測驗模式挑戰後回傳合格成績歐！！</p>
-      <p class="note">姓名＋生日 範例：王小明0828</p>
-      <p class="note">請回傳合格成績</p>
+      <p id="example-note" class="note">姓名＋生日 範例：王小明0828</p>
+      <p id="submit-note" class="note">請回傳合格成績</p>
+
+      <p id="practice-message" class="note" style="display:none; color: #006600; font-weight: bold;"></p>
+
       <p id="submit-time" class="note"></p>
 
-      <br />
       <button id="submit-btn" onclick="submitToGoogle()">提交成績</button>
-      <button id="download-btn" onclick="downloadResult()">下載成績</button>
-      <button onclick="location.reload()">重新開始</button>
+      <button id="download-btn" onclick="downloadResultImage()">下載成績</button>
+      <button id="restart-btn">重新開始</button>
       <button onclick="goBackToModeSelect()">回到模式選擇</button>
     </div>
   </div>
@@ -148,6 +145,7 @@
       { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
     ];
 
+    let mode = "";
     let shuffledQuestions = [];
     let current = 0;
     let correct = 0;
@@ -159,7 +157,6 @@
     let startTime = 0;
     let endTime = 0;
     let timeOver = false;
-    let mode = "";
 
     const audioEl = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
@@ -170,7 +167,10 @@
     const submitBtn = document.getElementById("submit-btn");
     const downloadBtn = document.getElementById("download-btn");
     const nicknameInput = document.getElementById("nickname");
+    const exampleNote = document.getElementById("example-note");
+    const submitNote = document.getElementById("submit-note");
     const practiceMessage = document.getElementById("practice-message");
+    const restartBtn = document.getElementById("restart-btn");
 
     function startGame(selectedMode) {
       mode = selectedMode;
@@ -195,8 +195,8 @@
       questionNum.classList.remove("hidden");
       feedback.classList.remove("hidden");
       timerDisplay.classList.remove("hidden");
-
-      practiceMessage.classList.add("hidden");
+      document.getElementById("result").classList.add("hidden");
+      document.getElementById("submit-time").textContent = "";
 
       if (mode === "practice") {
         timerDisplay.textContent = "練習模式：無時間限制";
@@ -207,6 +207,12 @@
         submitBtn.style.display = "block";
         downloadBtn.style.display = "block";
       }
+
+      nicknameInput.value = "";
+
+      exampleNote.style.display = "block";
+      submitNote.style.display = "block";
+      practiceMessage.style.display = "none";
 
       startTime = Date.now();
       loadQuestion();
@@ -306,26 +312,28 @@
 
       const percent = Math.round((correct / shuffledQuestions.length) * 100);
       document.getElementById("score-text").textContent = `你的分數是 ${percent}% (${correct} / ${shuffledQuestions.length})`;
-      const passFailText = document.getElementById("pass-fail");
 
+      const passFailText = document.getElementById("pass-fail");
       if (mode === "practice") {
-        passFailText.textContent = "";
+        passFailText.textContent = "🔍 練習模式結束";
+
+        nicknameInput.style.display = "none";
+        exampleNote.style.display = "none";
+        submitNote.style.display = "none";
+
+        practiceMessage.style.display = "block";
+        practiceMessage.textContent = "可重複練習～最後記得要去測驗模式挑戰後回傳合格成績歐！！";
+
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
-        nicknameInput.style.display = "none";
-        document.querySelector("#practice-message").style.display = "block";
-        document.querySelector("#practice-message").textContent = "可重複練習～最後記得要去測驗模式挑戰後回傳合格成績歐！！";
-        document.querySelector(".note:nth-of-type(2)").style.display = "none"; // 隱藏姓名＋生日範例
-        document.querySelector(".note:nth-of-type(3)").style.display = "none"; // 隱藏請回傳合格成績
         document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
         return;
       }
 
-      // 測驗模式
-      nicknameInput.style.display = "inline-block";
-      document.querySelector("#practice-message").style.display = "none";
-      document.querySelector(".note:nth-of-type(2)").style.display = "block";
-      document.querySelector(".note:nth-of-type(3)").style.display = "block";
+      nicknameInput.style.display = "block";
+      exampleNote.style.display = "block";
+      submitNote.style.display = "block";
+      practiceMessage.style.display = "none";
 
       if (percent >= 80 && !timeOver) {
         passFailText.textContent = "🎉 成績合格！";
@@ -336,6 +344,7 @@
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
       }
+
       document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
     }
 
@@ -391,44 +400,67 @@
       formData.append("entry.1110600272", gameTitle);
       formData.append("entry.1052097214", answerLogText);
 
-      fetch(formURL, { method: "POST", mode: "no-cors", body: formData })
-        .then(() => {
-          alert("✅ 提交成功!! 可重複測驗");
-        })
-        .catch(() => {
-          alert("✅ 已送出（若瀏覽器阻擋回應，請確認表單是否收到）");
+      fetch(formURL, {
+        method: "POST",
+        body: formData,
+        mode: "no-cors"
+      }).then(() => {
+        alert("成績已送出！");
+        submitBtn.disabled = true;
+      }).catch(() => {
+        alert("送出失敗，請稍後再試");
+      });
+    }
+
+    function downloadResultImage() {
+      // 先把 result 區域複製一份放入新的 div 方便截圖
+      const resultDiv = document.getElementById("result");
+      const clone = resultDiv.cloneNode(true);
+
+      // 清除裡面不必要的按鈕（避免出現在截圖）
+      clone.querySelectorAll("button").forEach(btn => btn.style.display = "none");
+      clone.querySelector("#nickname").style.display = "none";
+      clone.querySelector("#example-note").style.display = "none";
+      clone.querySelector("#submit-note").style.display = "none";
+      clone.querySelector("#practice-message").style.display = "none";
+      clone.querySelector("#submit-time").style.display = "block";
+
+      // 在 clone 頂部插入 logo 圖片
+      const logoImg = document.createElement("img");
+      logoImg.src = "logo.png";
+      logoImg.style.width = "150px";
+      logoImg.style.maxWidth = "80%";
+      logoImg.style.marginBottom = "10px";
+      clone.insertBefore(logoImg, clone.firstChild);
+
+      // 建立一個離線容器不顯示在頁面
+      const offscreenDiv = document.createElement("div");
+      offscreenDiv.style.position = "fixed";
+      offscreenDiv.style.top = "-10000px";
+      offscreenDiv.style.left = "-10000px";
+      offscreenDiv.style.background = "white";
+      offscreenDiv.style.padding = "20px";
+      offscreenDiv.style.width = "400px";
+      offscreenDiv.style.textAlign = "center";
+      offscreenDiv.appendChild(clone);
+      document.body.appendChild(offscreenDiv);
+
+      html2canvas(offscreenDiv).then(canvas => {
+        canvas.toBlob(blob => {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `成績_${new Date().toISOString().slice(0,10)}.png`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+          document.body.removeChild(offscreenDiv);
         });
+      });
     }
 
-    function downloadResult() {
-      const nickname = nicknameInput.value.trim();
-      if (!nickname) {
-        alert("請輸入姓名才能下載成績圖片");
-        return;
-      }
-      const score = Math.round((correct / shuffledQuestions.length) * 100);
-      const now = new Date();
-      const time = now.toLocaleString("zh-TW");
-      const pass = (score >= 80 && !timeOver) ? "合格 🎉" : "不合格 ❌";
-
-      let text = `單字聽力測驗成績\n姓名: ${nickname}\n分數: ${score}%\n結果: ${pass}\n花費時間: ${Math.floor((endTime - startTime)/1000)}秒`;
-
-      const answerLogText = answerLog.map(item => {
-        const status = item.isCorrect ? "正確" : "錯誤";
-        return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
-      }).join("\n");
-
-      // 答題紀錄不顯示在下載內容，照你要求，所以這裡沒放
-
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${nickname}_聽力測驗成績.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    restartBtn.onclick = () => {
+      // 重新開始當前模式，不跳回模式選擇，且不需重輸密碼
+      startGame(mode);
+    };
   </script>
 </body>
 </html>
