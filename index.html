@@ -36,11 +36,19 @@
       padding: 10px 20px;
       font-size: 16px;
       display: block;
-    }
-    .choice-btn {
       width: 100%;
       max-width: 400px;
-      margin: 10px auto;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
     }
     .hidden {
       display: none;
@@ -110,13 +118,12 @@
       <button id="submit-btn" onclick="submitToGoogle()">提交成績</button>
       <button id="download-btn" onclick="downloadResult()">下載成績</button>
       <button onclick="location.reload()">重新開始</button>
-      <!-- 新增回到模式選擇按鈕 -->
       <button onclick="goBackToModeSelect()">回到模式選擇</button>
     </div>
   </div>
 
   <script>
-    let mode = "test"; // 預設測驗模式
+    let mode = "test";
     const gameTitle = "0-2 單字聽力測驗";
 
     const questions = [
@@ -138,13 +145,14 @@
       { word: "혀", korean: "舌頭", audio: "audio/000216W.mp3", choices: ["혀", "후", "효"] }
     ];
 
-    let shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
+    let shuffledQuestions = [];
     let current = 0;
     let correct = 0;
     let timerId;
-    const totalSeconds = shuffledQuestions.length * 8;
+    const totalSeconds = questions.length * 8;
     let timeLeft = totalSeconds;
     let timerStarted = false;
+    let answerLog = [];
 
     const audio = document.getElementById("audio");
     const choicesDiv = document.getElementById("choices");
@@ -155,12 +163,19 @@
     const downloadBtn = document.getElementById("download-btn");
     const submitBtn = document.getElementById("submit-btn");
 
-    let answerLog = [];
-
     function startGame(selectedMode) {
       mode = selectedMode;
       document.getElementById("mode-select").classList.add("hidden");
       document.getElementById("game-container").classList.remove("hidden");
+
+      // 重新初始化
+      current = 0;
+      correct = 0;
+      timeLeft = totalSeconds;
+      timerStarted = false;
+      clearInterval(timerId);
+      shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
+      answerLog = [];
 
       if (mode === "practice") {
         timerDisplay.textContent = "練習模式：無時間限制";
@@ -168,9 +183,24 @@
         downloadBtn.style.display = "none";
       } else {
         timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
+        submitBtn.style.display = "block";
+        downloadBtn.style.display = "block";
       }
 
-      loadQuestion();
+      loadQuestion(); // 修正：確保載入第一題
+    }
+
+    function goBackToModeSelect() {
+      document.getElementById("result").classList.add("hidden");
+      document.getElementById("mode-select").classList.remove("hidden");
+      document.getElementById("game-container").classList.add("hidden");
+
+      current = 0;
+      correct = 0;
+      timeLeft = totalSeconds;
+      timerStarted = false;
+      clearInterval(timerId);
+      answerLog = [];
     }
 
     function startTimer() {
@@ -197,7 +227,6 @@
       q.choices.sort(() => 0.5 - Math.random()).forEach((choice) => {
         const btn = document.createElement("button");
         btn.textContent = choice;
-        btn.className = "choice-btn";
         btn.onclick = () => {
           const correctAnswer = q.word;
           const selectedAnswer = choice;
@@ -221,7 +250,7 @@
           }
 
           nextBtn.disabled = false;
-          document.querySelectorAll(".choice-btn").forEach((b) => {
+          document.querySelectorAll("#choices button").forEach((b) => {
             b.disabled = true;
             if (b.textContent === correctAnswer) {
               b.style.backgroundColor = "#8f8";
@@ -272,125 +301,6 @@
         submitBtn.disabled = true;
         downloadBtn.disabled = true;
       }
-    }
-
-    function goBackToModeSelect() {
-      document.getElementById("result").classList.add("hidden");
-      document.getElementById("mode-select").classList.remove("hidden");
-      document.getElementById("game-container").classList.add("hidden");
-
-      current = 0;
-      correct = 0;
-      timeLeft = totalSeconds;
-      timerStarted = false;
-      clearInterval(timerId);
-      shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
-    }
-
-    function submitToGoogle() {
-      const nickname = document.getElementById("nickname").value.trim();
-      if (!nickname) {
-        alert("請輸入暱稱");
-        return;
-      }
-      const score = Math.round((correct / shuffledQuestions.length) * 100);
-      const now = new Date();
-      const time = now.toLocaleString("zh-TW");
-      const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-      const weekday = weekdays[now.getDay()];
-      let answerLogText = answerLog.map(item => {
-        const status = item.isCorrect ? "正確" : "錯誤";
-        return `第${item.questionIndex}題 ${item.questionWord} 選擇 ${item.selectedAnswer} ${status}`;
-      }).join("\n");
-      const formURL = "https://docs.google.com/forms/d/e/1FAIpQLSd8KhDu_lq6g4aPzkLaNYUUVG9P0E9cRT1R2WVDIkkfFh7WxA/formResponse";
-      const formData = new FormData();
-      formData.append("entry.1082970818", nickname);
-      formData.append("entry.851626887", score);
-      formData.append("entry.498226528", time);
-      formData.append("entry.532888754", weekday);
-      formData.append("entry.1110600272", gameTitle);
-      formData.append("entry.1052097214", answerLogText);
-      fetch(formURL, { method: "POST", mode: "no-cors", body: formData }).then(() => {
-        alert("✅ 提交成功!!可重複測驗");
-      });
-    }
-
-    function downloadResult() {
-      const nickname = document.getElementById("nickname").value.trim();
-      if (!nickname) {
-        alert("請輸入姓名才能下載成績圖片");
-        return;
-      }
-      const score = Math.round((correct / shuffledQuestions.length) * 100);
-      const now = new Date();
-      const time = now.toLocaleString("zh-TW");
-      const pass = score >= 80;
-      generateAndDownloadImage({
-        logoSrc: "logo.png",
-        title: gameTitle,
-        testTime: time,
-        nickname,
-        score,
-        pass
-        
-      });
-    }
-
-    function generateAndDownloadImage({logoSrc, title, testTime, nickname, score, pass, answerLog}) {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      const width = 600;
-      const lineHeight = 28;
-      let y = 0;
-      canvas.width = width;
-      canvas.height = 650;
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, width, canvas.height);
-      ctx.fillStyle = "#000";
-      ctx.textBaseline = "top";
-      ctx.font = "20px sans-serif";
-      const img = new Image();
-      img.src = logoSrc;
-      img.onload = () => {
-        const imgWidth = 200;
-        const imgHeight = img.height * (imgWidth / img.width);
-        ctx.drawImage(img, (width - imgWidth) / 2, y, imgWidth, imgHeight);
-        y += imgHeight + 20;
-        ctx.font = "24px sans-serif";
-        ctx.fillText(title, 20, y);
-        y += lineHeight + 10;
-        ctx.font = "18px sans-serif";
-        ctx.fillText(`測驗時間：${testTime}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`測驗者名稱：${nickname}`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`成績：${score}% (${correct} / ${shuffledQuestions.length})`, 20, y);
-        y += lineHeight;
-        ctx.fillText(`是否合格：${pass ? "合格 🎉" : "不合格 ❌"}`, 20, y);
-        y += lineHeight + 10;
-        ctx.font = "16px monospace";
-        ctx.fillText("答題記錄：", 20, y);
-        y += lineHeight;
-        const maxLogLines = 15;
-        for (let i = 0; i < Math.min(answerLog.length, maxLogLines); i++) {
-          const item = answerLog[i];
-          const status = item.isCorrect ? "✔️" : "❌";
-          const text = `第${item.questionIndex}題 ${item.questionWord} 選${item.selectedAnswer} ${status}`;
-          ctx.fillText(text, 20, y);
-          y += lineHeight;
-        }
-        if (answerLog.length > maxLogLines) {
-          ctx.fillText(`... 共${answerLog.length}題`, 20, y);
-        }
-        canvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${nickname}_${title}_成績.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        });
-      };
     }
 
     audio.addEventListener("play", () => {
