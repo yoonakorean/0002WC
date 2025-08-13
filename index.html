@@ -31,7 +31,6 @@
       color: #c00;
       margin-bottom: 20px;
     }
-    /* 統一按鈕大小樣式（包含選項按鈕） */
     button {
       margin: 10px auto;
       padding: 10px 20px;
@@ -83,7 +82,6 @@
 </head>
 <body>
   <script>
-    // 密碼保護（若不需要可移除）
     var password = prompt("請輸入密碼才能進入此網站：");
     if (password !== "1231") {
       alert("密碼錯誤，無法進入！");
@@ -91,7 +89,6 @@
     }
   </script>
 
-  <!-- 模式選擇 -->
   <div id="mode-select">
     <h2>請選擇模式</h2>
     <button onclick="startGame('practice')">練習模式（無時間限制）</button>
@@ -99,7 +96,6 @@
     <p style="font-size:14px; color:#555; margin-top:10px;">兩種模式皆可重複練習～</p>
   </div>
 
-  <!-- 測驗畫面 -->
   <div id="game-container" class="hidden">
     <img src="logo.png" alt="Logo" id="logo" />
     <div id="game-title">0-2 單字聽力測驗</div>
@@ -125,6 +121,7 @@
 
       <br />
       <button id="submit-btn" onclick="submitToGoogle()">提交成績</button>
+      <!-- 下載成績按鈕已移除 -->
       <button id="restart-btn">重新開始</button>
       <button onclick="goBackToModeSelect()">回到模式選擇</button>
     </div>
@@ -213,10 +210,10 @@
       }
 
       nicknameInput.value = "";
-      nicknameInput.style.display = "block";
-      exampleNote.style.display = "block";
-      submitNote.style.display = "block";
-      practiceMessage.style.display = "none";
+      nicknameInput.style.display = mode === "practice" ? "none" : "block";
+      exampleNote.style.display = mode === "practice" ? "none" : "block";
+      submitNote.style.display = mode === "practice" ? "none" : "block";
+      practiceMessage.style.display = mode === "practice" ? "block" : "none";
 
       startTime = Date.now();
       loadQuestion();
@@ -256,9 +253,8 @@
         const btn = document.createElement("button");
         btn.textContent = choice;
         btn.className = "choice-btn";
-
         btn.onclick = () => {
-          // 若挑戰模式且倒數還沒開始，點選答案時就開始倒數
+          // 如果倒數沒開始，點選選項時啟動倒數
           if (!timerStarted && mode === "test") {
             startTimer();
           }
@@ -369,7 +365,6 @@
       timerDisplay.classList.remove("hidden");
     }
 
-    // 保留音檔播放開始倒數
     audioEl.addEventListener("play", () => {
       if (!timerStarted && mode === "test") {
         startTimer();
@@ -409,7 +404,38 @@
     }
 
     restartBtn.onclick = () => {
-      goBackToModeSelect();
+      clearInterval(timerId);
+      current = 0;
+      correct = 0;
+      timeLeft = mode === "test" ? shuffledQuestions.length * 8 : 0;
+      timerStarted = false;
+      timeOver = false;
+      answerLog = [];
+      startTime = Date.now();
+
+      document.getElementById("result").classList.add("hidden");
+      audioEl.classList.remove("hidden");
+      choicesDiv.classList.remove("hidden");
+      nextBtn.classList.remove("hidden");
+      questionNum.classList.remove("hidden");
+      feedback.classList.remove("hidden");
+      timerDisplay.classList.remove("hidden");
+
+      if (mode === "practice") {
+        timerDisplay.textContent = "練習模式：無時間限制";
+        submitBtn.style.display = "none";
+      } else {
+        timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
+        submitBtn.style.display = "block";
+      }
+
+      nicknameInput.value = "";
+      nicknameInput.style.display = mode === "practice" ? "none" : "block";
+      exampleNote.style.display = mode === "practice" ? "none" : "block";
+      submitNote.style.display = mode === "practice" ? "none" : "block";
+      practiceMessage.style.display = mode === "practice" ? "block" : "none";
+
+      loadQuestion();
     };
   </script>
 </body>
