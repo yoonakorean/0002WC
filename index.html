@@ -125,13 +125,10 @@
 
       <br />
       <button id="submit-btn" onclick="submitToGoogle()">提交成績</button>
-      <button id="download-btn" onclick="downloadResult()">下載成績</button>
       <button id="restart-btn">重新開始</button>
       <button onclick="goBackToModeSelect()">回到模式選擇</button>
     </div>
   </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
     const gameTitle = "0-2 單字聽力測驗";
@@ -175,7 +172,6 @@
     const questionNum = document.getElementById("question-number");
     const timerDisplay = document.getElementById("timer");
     const submitBtn = document.getElementById("submit-btn");
-    const downloadBtn = document.getElementById("download-btn");
     const nicknameInput = document.getElementById("nickname");
     const exampleNote = document.getElementById("example-note");
     const submitNote = document.getElementById("submit-note");
@@ -211,11 +207,9 @@
       if (mode === "practice") {
         timerDisplay.textContent = "練習模式：無時間限制";
         submitBtn.style.display = "none";
-        downloadBtn.style.display = "none";
       } else {
         timerDisplay.textContent = `剩餘時間：${timeLeft} 秒`;
         submitBtn.style.display = "block";
-        downloadBtn.style.display = "block";
       }
 
       nicknameInput.value = "";
@@ -262,7 +256,13 @@
         const btn = document.createElement("button");
         btn.textContent = choice;
         btn.className = "choice-btn";
+
         btn.onclick = () => {
+          // 若挑戰模式且倒數還沒開始，點選答案時就開始倒數
+          if (!timerStarted && mode === "test") {
+            startTimer();
+          }
+
           const correctAnswer = q.word;
           const selectedAnswer = choice;
           const chinese = q.korean;
@@ -335,7 +335,6 @@
         practiceMessage.innerHTML = "可重複練習～<br>最後記得要去挑戰模式挑戰後回傳合格成績歐！！";
 
         submitBtn.disabled = true;
-        downloadBtn.disabled = true;
         document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
         return;
       }
@@ -343,11 +342,9 @@
       if (percent >= 80 && !timeOver) {
         passFailText.textContent = "🎉 成績合格！可重新測驗";
         submitBtn.disabled = false;
-        downloadBtn.disabled = false;
       } else {
         passFailText.textContent = timeOver ? "❌ 時間到 — 成績不合格" : "❌ 成績不合格，請重新測驗";
         submitBtn.disabled = true;
-        downloadBtn.disabled = true;
       }
 
       document.getElementById("submit-time").textContent = `花費時間：${spentSeconds} 秒`;
@@ -372,6 +369,7 @@
       timerDisplay.classList.remove("hidden");
     }
 
+    // 保留音檔播放開始倒數
     audioEl.addEventListener("play", () => {
       if (!timerStarted && mode === "test") {
         startTimer();
@@ -408,85 +406,6 @@
       fetch(formURL, { method: "POST", mode: "no-cors", body: formData })
         .then(() => alert("成績已回傳！可重複挑戰。"))
         .catch(() => alert("回傳失敗，請稍後再試。"));
-    }
-
-    // 下載成績（圖片） - 調整版面字體與新增測驗時間
-    function downloadResult() {
-      const captureDiv = document.createElement("div");
-      captureDiv.style.width = "360px";
-      captureDiv.style.margin = "auto";
-      captureDiv.style.padding = "30px 25px";
-      captureDiv.style.border = "1.5px solid #bbb";
-      captureDiv.style.backgroundColor = "#fafafa";
-      captureDiv.style.textAlign = "center";
-      captureDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-      captureDiv.style.color = "#333";
-      captureDiv.style.borderRadius = "10px";
-      captureDiv.style.lineHeight = "1.6";       // 行高拉開
-      captureDiv.style.letterSpacing = "0.03em"; // 字間距拉開
-
-      // Logo
-      const logoImg = document.createElement("img");
-      logoImg.src = "logo.png";
-      logoImg.style.width = "140px";
-      logoImg.style.marginBottom = "20px";
-      captureDiv.appendChild(logoImg);
-
-      // 標題
-      const titleEl = document.createElement("div");
-      titleEl.textContent = gameTitle;
-      titleEl.style.fontSize = "18px"; // 字體改小
-      titleEl.style.fontWeight = "700";
-      titleEl.style.marginBottom = "22px";
-      captureDiv.appendChild(titleEl);
-
-      // 測驗時間（新增）
-      const timeText = document.getElementById("submit-time").textContent || "";
-      const timeEl = document.createElement("div");
-      timeEl.textContent = `測驗時間：${timeText.replace("花費時間：", "")}`;
-      timeEl.style.fontSize = "14px";
-      timeEl.style.marginBottom = "20px";
-      timeEl.style.color = "#555";
-      captureDiv.appendChild(timeEl);
-
-      // 姓名
-      const nickname = nicknameInput.value.trim();
-      const nameEl = document.createElement("div");
-      nameEl.textContent = `姓名：${nickname}`;
-      nameEl.style.fontSize = "16px";
-      nameEl.style.fontWeight = "600";
-      nameEl.style.marginBottom = "20px";
-      captureDiv.appendChild(nameEl);
-
-      // 成績
-      const scoreText = document.getElementById("score-text").textContent || "";
-      const scoreEl = document.createElement("div");
-      scoreEl.textContent = scoreText;
-      scoreEl.style.fontSize = "16px";
-      scoreEl.style.fontWeight = "600";
-      scoreEl.style.marginBottom = "20px";
-      captureDiv.appendChild(scoreEl);
-
-      // 是否合格
-      const passFail = document.getElementById("pass-fail").textContent || "";
-      const passFailEl = document.createElement("div");
-      passFailEl.textContent = passFail;
-      passFailEl.style.fontSize = "16px";
-      passFailEl.style.fontWeight = "700";
-      passFailEl.style.color = passFail.includes("合格") ? "#007700" : "#c00";
-      passFailEl.style.marginBottom = "20px";
-      captureDiv.appendChild(passFailEl);
-
-      document.body.appendChild(captureDiv);
-
-      html2canvas(captureDiv).then(canvas => {
-        const link = document.createElement("a");
-        link.download = `成績_${nickname}_${new Date().toISOString().slice(0,10)}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-
-        document.body.removeChild(captureDiv);
-      });
     }
 
     restartBtn.onclick = () => {
